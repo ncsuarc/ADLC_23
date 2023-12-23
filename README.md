@@ -34,9 +34,9 @@ pip install -r ncsuadlc_pipreqs.txt
 pip install -r requirements.txt
 ```
 
-## Using CuDNN Acceleration on VLC
+## Using cuDNN Acceleration on VLC
 
-NCSU provides VLCs with RTX 2080 GPUs that can be used for training the CNN quickly. CUDA is already installed on these systems but you will need to install CuDNN as well:
+NCSU provides VLCs with RTX 2080 GPUs that can be used for training the CNN quickly. CUDA is already installed on these systems but you will need to install cuDNN as well:
 
 ```sh
 sudo apt-get install libcudnn8=8.8.0.121-1+cuda12.1
@@ -44,16 +44,18 @@ sudo apt-get install libcudnn8-dev=8.8.0.121-1+cuda12.1
 sudo apt-get install libcudnn8-samples=8.8.0.121-1+cuda12.1
 ```
 
-To check that CuDNN was set up correctly, run built-in test suite:
+To check that cuDNN was set up correctly, run built-in test suite:
 
 ```sh
+sudo apt-get install libfreeimage3 libfreeimage-dev
 cp -r /usr/src/cudnn_samples_v8/ $HOME
 cd  $HOME/cudnn_samples_v8/mnistCUDNN
 make clean && make
-sudo apt-get install libfreeimage3 libfreeimage-dev
 make clean && make
 ./mnistCUDNN
 ```
+
+See [cuDNN install guide](https://docs.nvidia.com/deeplearning/cudnn/install-guide/index.html#package-manager-ubuntu-install) for more info.
 
 You will also need to make sure that Tensorflow has needed GPU dependencies using:
 
