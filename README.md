@@ -34,6 +34,11 @@ pip install -r ncsuadlc_pipreqs.txt
 pip install -r requirements.txt
 ```
 
+## Setup Tesseract
+```sh
+apt-get install tesseract-ocr libtesseract-dev libleptonica-dev pkg-config
+```
+
 ## Using cuDNN Acceleration on VLC
 
 NCSU provides VLCs with RTX 2080 GPUs that can be used for training the CNN quickly. CUDA is already installed on these systems but you will need to install cuDNN as well:
