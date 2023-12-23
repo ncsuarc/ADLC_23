@@ -4,3 +4,6 @@ data/238_train_ds/*
 adlc_keras.code-workspace
 __pycache__/*
 adlc/__pycache__/object_detection.cpython-311.pyc
+model/__pycache__/adlc_util.cpython-310.pyc
+adlc/__pycache__/object_detection.cpython-310.pyc
+*.pyc

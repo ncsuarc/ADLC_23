@@ -5,7 +5,7 @@ https://keras.io/guides/keras_cv/object_detection_keras_cv/
 # import tensorflow_datasets as tfds
 import tensorflow as tf
 from PIL import Image
-from model.visualization_util import visualize_dataset
+from adlc_util import visualize_dataset
 
 BATCH_SIZE = 4
 RAND_SEED = 0  # None for final

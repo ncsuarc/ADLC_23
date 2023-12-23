@@ -1,15 +1,16 @@
-from keras_cv import bounding_box
 from object_detection import TargetDetector
-import cv2 
 from single_ocr import TesseractCharReader
+
+from PIL import Image
+import cv2 
 
 def find_targets(images):
     """
     Returns a list of predicted bounding boxes for targets
     """ 
-    # Invoke model and format 
-    bounding_boxes = bounding_box.to_ragged(targetDetector.predict(images))
-    return bounding_boxes
+    # Invoke model
+    targetDetector.find_targets(images)
+    
 
 def read_character(image) -> str:
     """
@@ -20,4 +21,9 @@ def read_character(image) -> str:
 
 if __name__ == "__main__":
     targetDetector = TargetDetector()
+
+    images = [Image.open("./data/flight_238/flight_238_im32.jpg"), Image.open("./data/flight_238/flight_238_im33.jpg")]
+
+    print(find_targets(images))
+
     ocr = TesseractCharReader()
