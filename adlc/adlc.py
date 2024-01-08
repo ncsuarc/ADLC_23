@@ -1,6 +1,7 @@
 from pathlib import Path
 from object_detection import TargetDetector
 from single_ocr import TesseractCharReader
+from shape_match import match_contour
 
 from PIL import Image
 import cv2 
@@ -69,6 +70,19 @@ def match_colors(image):
     # Return RGB for now, need to make a text conversion
     return bg_mean[0:3][::-1], fg_mean[0:3][::-1]
 
+def match_shapes(image):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    sharpen_kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
+    sharpen = cv2.filter2D(gray, -1, sharpen_kernel)
+
+    thresh = cv2.threshold(sharpen, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+
+    # Create contours and order by area
+    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[-2:]
+
+    return match_contour(contours[0])
+
 
 if __name__ == "__main__":
     # targetDetector = TargetDetector()
@@ -88,3 +102,6 @@ if __name__ == "__main__":
 
             # OCR
             print(read_character(img_crop))
+
+            # Shape matching
+            print(match_shapes(image))
