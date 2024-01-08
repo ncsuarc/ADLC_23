@@ -37,7 +37,9 @@ pip install -r requirements.txt
 
 ## Setup Tesseract
 ```sh
-apt-get install tesseract-ocr libtesseract-dev libleptonica-dev pkg-config
+sudo apt install tesseract-ocr libtesseract-dev libleptonica-dev pkg-config
+
+curl -o ~/.local/share/tessdata/eng.traineddata https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata
 ```
 
 ## Using CuDNN Acceleration on VLC
@@ -45,9 +47,8 @@ apt-get install tesseract-ocr libtesseract-dev libleptonica-dev pkg-config
 NCSU provides VLCs with RTX 2080 GPUs that can be used for training the CNN quickly. CUDA is already installed on these systems but you will need to install CuDNN as well:
 
 ```sh
-sudo apt-get install libcudnn8 #=8.8.0.121-1+cuda12.1
-sudo apt-get install libcudnn8-dev #=8.8.0.121-1+cuda12.1
-sudo apt-get install libcudnn8-samples #=8.8.0.121-1+cuda12.1
+#=8.8.0.121-1+cuda12.1
+sudo apt install libcudnn8 libcudnn8-dev libcudnn8-samples
 ```
 
 To check that CuDNN was set up correctly, run built-in test suite:
@@ -55,7 +56,7 @@ To check that CuDNN was set up correctly, run built-in test suite:
 ```sh
 cp -r /usr/src/cudnn_samples_v8/ $HOME
 cd  $HOME/cudnn_samples_v8/mnistCUDNN
-sudo apt-get install libfreeimage3 libfreeimage-dev
+sudo apt install libfreeimage3 libfreeimage-dev
 make clean && make
 ./mnistCUDNN
 ```
