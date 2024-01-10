@@ -8,3 +8,4 @@ model/__pycache__/adlc_util.cpython-310.pyc
 adlc/__pycache__/object_detection.cpython-310.pyc
 *.pyc
 tmp/mask.png
+.venv/*
