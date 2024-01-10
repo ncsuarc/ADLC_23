@@ -6,9 +6,9 @@
 # Install pip and requirements
 sudo apt install -y pip
 
-# Create and activate venv (optional)
-python3 -m venv .venv
-source .venv/bin/activate
+# # Create and activate venv (optional)
+# python3 -m venv .venv
+# source .venv/bin/activate
 
 # Auto confirm (since no '-y' option)
 yes | pip install -r requirements.txt

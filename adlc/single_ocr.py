@@ -27,7 +27,7 @@ class TesseractCharReader:
         self.api.SetImage(img)
 
         # print(self.api.AllWordConfidences()) # Optionally get confidence values
-        return self.api.GetUTF8Text()
+        return self.api.GetUTF8Text()[0]
     
     def osd(self, img):
         self.osd_api.SetImage(img)

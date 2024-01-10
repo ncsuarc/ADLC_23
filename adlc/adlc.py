@@ -1,107 +1,158 @@
 from pathlib import Path
 from object_detection import TargetDetector
 from single_ocr import TesseractCharReader
-from shape_match import match_contour
+from shape_match import ContourShapeMatcher
 
 from PIL import Image
-import cv2 
+import cv2
 import numpy as np
 
 TESSDATA_PATH = str(Path.home() / ".local/share/tessdata")
 
-def xywh_to_xyxy(x,y,w,h):
 
-    return x,y,x+w,y+h
+class ADLC:
+    def __init__(self) -> None:
+        self.ocr = TesseractCharReader(path=TESSDATA_PATH)
+        # self.targetDetector = TargetDetector()
+        self.shapeMatcher = ContourShapeMatcher()
 
-def find_targets(images):
-    """
-    Returns a list of predicted bounding boxes for targets
-    """ 
-    # Invoke model
-    # targetDetector.find_targets(images)
+    def xywh_to_xyxy(self, x, y, w, h):
+        return x, y, x + w, y + h
 
-    # For now just return test values for flight_238_im32-33
-    return [[(2763, 981, 54, 54)],[(2898, 0, 69, 48), (177, 288, 39, 42)]]
-    
+    def get_center(self, x, y, w, h):
+        return x + (0.5 * w), y + (0.5 * h)
 
-def read_character(image) -> str:
-    """
-    Reads all text in image
-    """
+    def _get_contours(self, image):
+        """
+        Thresholds image and finds contours.
+        """
 
-    return ocr.read(image)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-def match_colors(image):
-    """
-    Returns a tuple for target and text colors respectively
-    """
+        sharpen_kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
+        sharpen = cv2.filter2D(gray, -1, sharpen_kernel)
 
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        thresh = cv2.threshold(sharpen, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
 
-    sharpen_kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
-    sharpen = cv2.filter2D(gray, -1, sharpen_kernel)
+        # Create contours and order by area
+        contours, hierarchy = cv2.findContours(
+            thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
+        )[-2:]
 
-    thresh = cv2.threshold(sharpen, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+        return thresh, contours
 
-    # Create contours and order by area
-    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[-2:]
-    contours = sorted(contours, key=cv2.contourArea, reverse=True)
+    def find_targets(self, images):
+        """
+        Returns a list of predicted bounding boxes for targets
+        """
+        # Invoke model
+        # targetDetector.find_targets(images)
 
-    # Create mask for target background
-    bg_mask = np.zeros_like(thresh)
-    # Include target
-    cv2.drawContours(bg_mask, contours, 0, 255, -1)
-    # Subtract text
-    cv2.drawContours(bg_mask, contours, 1, 0, -1)
-    # Calculate mean
-    bg_mean = cv2.mean(image, mask=bg_mask)
+        # DEBUG HARDCODED VALUES:
+        # For now just return test values for flight_238_im32-33
+        return [[(2763, 981, 54, 54)], [(2898, 0, 69, 48), (177, 288, 39, 42)]]
 
-    # Repeat for foreground (text)
-    # Because of the thin lines, this performs poorly, and may be unnecessary
-    fg_mask = np.zeros_like(thresh)
-    # Only include text
-    cv2.drawContours(fg_mask, contours, 1, 255, -1)
-    fg_mean = cv2.mean(image, mask=fg_mask)
+    def read_character(self, image) -> str:
+        """
+        Reads all text in image
+        """
 
-    cv2.imwrite("tmp/mask.png", fg_mask)
+        return self.ocr.read(image)
 
-    print(bg_mean[0:3][::-1], fg_mean[0:3][::-1])
+    def match_colors(self, image):
+        """
+        Returns a tuple for target and text colors respectively
+        """
+        thresh, contours = self._get_contours(image)
+        contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
-    # Return RGB for now, need to make a text conversion
-    return bg_mean[0:3][::-1], fg_mean[0:3][::-1]
+        # Create mask for target background
+        bg_mask = np.zeros_like(thresh)
+        # Include target
+        cv2.drawContours(bg_mask, contours, 0, 255, -1)
+        # Subtract text
+        cv2.drawContours(bg_mask, contours, 1, 0, -1)
+        # Calculate mean
+        bg_mean = cv2.mean(image, mask=bg_mask)
 
-def match_shapes(image):
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        # Repeat for foreground (text)
+        # Because of the thin lines, this performs poorly, and may be unnecessary
+        fg_mask = np.zeros_like(thresh)
+        # Only include text
+        cv2.drawContours(fg_mask, contours, 1, 255, -1)
+        fg_mean = cv2.mean(image, mask=fg_mask)
 
-    sharpen_kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
-    sharpen = cv2.filter2D(gray, -1, sharpen_kernel)
+        cv2.imwrite("tmp/mask.png", fg_mask)
 
-    thresh = cv2.threshold(sharpen, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+        # print(bg_mean[0:3][::-1], fg_mean[0:3][::-1])
 
-    # Create contours and order by area
-    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[-2:]
+        # Return RGB for now, need to make a text conversion
+        return bg_mean[0:3][::-1], fg_mean[0:3][::-1]
 
-    return match_contour(contours[0])
+    def match_shapes(self, image):
+        _, contours = self._get_contours(image)
+
+        return self.shapeMatcher.match_contour(contours[0])
+
+    def process_images(self, images, metadata):
+        """
+        Perform DLC on a batch of images and return list of target centers + characteristics
+        for each. TODO: provide via an API
+
+        Metadata currently unused, but may be used to store the orientation of the aircraft
+        for each image to estimate location. For now, only finding coord in image.
+        """
+
+        # Perform object detection
+        targets = self.find_targets(images)
+
+        # Holds results for each image passed
+        batch_results = []
+
+        # Iterate over detected objects
+        for i, image in enumerate(images):
+            # Store a list of dicts for each target detected
+            image_targets = []
+
+            for j, target in enumerate(targets[i]):
+                x, y, w, h = target
+                img_crop = image[y : y + h, x : x + w]
+
+                # Color check
+                bg_color, txt_color = self.match_colors(img_crop)
+
+                # OCR
+                char = self.read_character(img_crop)
+
+                # Shape matching
+                shape = self.match_shapes(image)
+
+                # Store characteristics as key-value dict and add current image
+                image_targets += [
+                    {
+                        "bg_color": bg_color,
+                        "txt_color": txt_color,
+                        "predicted_character": char,
+                        "predicted_shape": shape,
+                    }
+                ]
+            batch_results += image_targets
+
+        return batch_results
 
 
 if __name__ == "__main__":
-    # targetDetector = TargetDetector()
-    ocr = TesseractCharReader(path=TESSDATA_PATH)
+    adlc = ADLC()
 
-    images = [cv2.imread("./data/flight_238/flight_238_im32.jpg"), cv2.imread("./data/flight_238/flight_238_im33.jpg")]
+    # DEBUG HARDCODED VALUES:
+    # For now use flight_238_im32-33 (hardcoded)
+    images = [
+        cv2.imread("./data/flight_238/flight_238_im32.jpg"),
+        cv2.imread("./data/flight_238/flight_238_im33.jpg"),
+    ]
 
-    targets = find_targets(images)
+    # Simulate batch API call
+    results = adlc.process_images(images, None)
 
-    for i, image in enumerate(images):
-        for j, target in enumerate(targets[i]):
-            x,y,w,h = target
-            img_crop = image[y:y+h, x:x+w]
-
-            # Color check
-            match_colors(img_crop)
-
-            # OCR
-            print(read_character(img_crop))
-
-            # Shape matching
-            print(match_shapes(image))
+    for r in results:
+        print(str(r))
