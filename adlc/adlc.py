@@ -1,6 +1,6 @@
 from pathlib import Path
-from object_detection import TargetDetector
-from single_ocr import TesseractCharReader
+# from object_detection import TargetDetector
+# from single_ocr import TesseractCharReader
 from shape_match import ContourShapeMatcher
 
 from PIL import Image
@@ -9,10 +9,9 @@ import numpy as np
 
 TESSDATA_PATH = str(Path.home() / ".local/share/tessdata")
 
-
 class ADLC:
     def __init__(self) -> None:
-        self.ocr = TesseractCharReader(path=TESSDATA_PATH)
+        # self.ocr = TesseractCharReader(path=TESSDATA_PATH)
         # self.targetDetector = TargetDetector()
         self.shapeMatcher = ContourShapeMatcher()
 
@@ -32,12 +31,16 @@ class ADLC:
         sharpen_kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
         sharpen = cv2.filter2D(gray, -1, sharpen_kernel)
 
-        thresh = cv2.threshold(sharpen, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+        _, thresh = cv2.threshold(sharpen, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        # cv2.imwrite("test.png", thresh)
 
         # Create contours and order by area
         contours, hierarchy = cv2.findContours(
             thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
         )[-2:]
+
+        contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
         return thresh, contours
 
@@ -64,7 +67,6 @@ class ADLC:
         Returns a tuple for target and text colors respectively
         """
         thresh, contours = self._get_contours(image)
-        contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
         # Create mask for target background
         bg_mask = np.zeros_like(thresh)
@@ -90,7 +92,11 @@ class ADLC:
         return bg_mean[0:3][::-1], fg_mean[0:3][::-1]
 
     def match_shapes(self, image):
+        image = cv2.resize(image, (50,50))
+
         _, contours = self._get_contours(image)
+        # cv2.drawContours(image, contours, 0, (0,0,255), -1)
+        # cv2.imwrite(f"./tmp/cont_{0}.png", image)
 
         return self.shapeMatcher.match_contour(contours[0])
 
@@ -122,10 +128,11 @@ class ADLC:
                 bg_color, txt_color = self.match_colors(img_crop)
 
                 # OCR
-                char = self.read_character(img_crop)
+                # char = self.read_character(img_crop)
+                char = None
 
                 # Shape matching
-                shape = self.match_shapes(image)
+                shape = self.match_shapes(img_crop)
 
                 # Store characteristics as key-value dict and add current image
                 image_targets += [
