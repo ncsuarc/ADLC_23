@@ -149,6 +149,7 @@ class ADLC:
                 # Store characteristics as key-value dict and add current image
                 image_targets += [
                     {
+                        "xywh": (x,y,w,h),
                         "bg_color": bg_color,
                         "txt_color": txt_color,
                         "predicted_character": char,
