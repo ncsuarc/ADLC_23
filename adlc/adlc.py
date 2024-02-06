@@ -1,4 +1,6 @@
 from pathlib import Path
+from adlc.color_match import rgb_to_text
+from adlc.geolocation import geolocate
 # from object_detection import TargetDetector
 # from single_ocr import TesseractCharReader
 from shape_match import ContourShapeMatcher
@@ -11,6 +13,7 @@ TESSDATA_PATH = str(Path.home() / ".local/share/tessdata")
 
 class ADLC:
     def __init__(self) -> None:
+        # DISABLED for speed during testing
         # self.ocr = TesseractCharReader(path=TESSDATA_PATH)
         # self.targetDetector = TargetDetector()
         self.shapeMatcher = ContourShapeMatcher()
@@ -33,8 +36,6 @@ class ADLC:
 
         _, thresh = cv2.threshold(sharpen, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
-        # cv2.imwrite("test.png", thresh)
-
         # Create contours and order by area
         contours, hierarchy = cv2.findContours(
             thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
@@ -49,6 +50,7 @@ class ADLC:
         Returns a list of predicted bounding boxes for targets
         """
         # Invoke model
+        # DISABLED for speed during testing
         # targetDetector.find_targets(images)
 
         # DEBUG HARDCODED VALUES:
@@ -86,24 +88,23 @@ class ADLC:
 
         cv2.imwrite("tmp/mask.png", fg_mask)
 
-        # print(bg_mean[0:3][::-1], fg_mean[0:3][::-1])
-
-        # Return RGB for now, need to make a text conversion
-        return bg_mean[0:3][::-1], fg_mean[0:3][::-1]
+        # Convert BGR to RGB and convert to closest color
+        bg_text = rgb_to_text(tuple(bg_mean[0:3][::-1]))
+        fg_text = rgb_to_text(tuple(fg_mean[0:3][::-1]))
+        
+        return bg_text, fg_text
 
     def match_shapes(self, image):
         image = cv2.resize(image, (50,50))
 
         _, contours = self._get_contours(image)
-        # cv2.drawContours(image, contours, 0, (0,0,255), -1)
-        # cv2.imwrite(f"./tmp/cont_{0}.png", image)
 
         return self.shapeMatcher.match_contour(contours[0])
 
     def process_images(self, images, metadata):
         """
         Perform DLC on a batch of images and return list of target centers + characteristics
-        for each. TODO: provide via an API
+        for each.
 
         Metadata currently unused, but may be used to store the orientation of the aircraft
         for each image to estimate location. For now, only finding coord in image.
@@ -117,6 +118,9 @@ class ADLC:
 
         # Iterate over detected objects
         for i, image in enumerate(images):
+            # Get EXIF/XMP data
+            xmp_data = image.getxmp()
+
             # Store a list of dicts for each target detected
             image_targets = []
 
@@ -124,10 +128,18 @@ class ADLC:
                 x, y, w, h = target
                 img_crop = image[y : y + h, x : x + w]
 
+                # Pixel center of target
+                center_x = x + (w // 2)
+                center_y = y + (h // 2)
+
+                # Geolocate target
+                long, lat = geolocate(center_x, center_y, xmp_data)
+
                 # Color check
                 bg_color, txt_color = self.match_colors(img_crop)
 
                 # OCR
+                # DISABLED for speed during testing
                 # char = self.read_character(img_crop)
                 char = None
 
@@ -141,6 +153,8 @@ class ADLC:
                         "txt_color": txt_color,
                         "predicted_character": char,
                         "predicted_shape": shape,
+                        "longitude": long,
+                        "latitude": lat,
                     }
                 ]
             batch_results += image_targets
