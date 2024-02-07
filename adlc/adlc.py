@@ -167,8 +167,8 @@ if __name__ == "__main__":
     # DEBUG HARDCODED VALUES:
     # For now use flight_238_im32-33 (hardcoded)
     images = [
-        cv2.imread("../data/flight_238/flight_238_im32.jpg"),
-        cv2.imread("../data/flight_238/flight_238_im33.jpg"),
+        cv2.imread("../data/test/flight_238_im32.jpg"),
+        cv2.imread("../data/test/flight_238_im33.jpg"),
     ]
 
     # Simulate batch API call
