@@ -91,10 +91,8 @@ class ContourShapeMatcher:
         _, thresh = cv2.threshold(quarter_circle, 127, 255, 0)
         contours, _ = cv2.findContours(thresh, 2, 1)[-2:]
         self.QUARTER_CIRCLE = contours[0]
-        # cv2.drawContours(thresh, contours, -1, 127, 1)
-        # cv2.imwrite("./tmp/quarter_thresh.png", thresh)
 
-        cross = cv2.imread("img/plusplus_inv.png", cv2.IMREAD_GRAYSCALE)
+        cross = cv2.imread("./img/plusplus_inv.png", cv2.IMREAD_GRAYSCALE)
         cross = cv2.resize(cross, (2 * R, 2 * R))
         _, thresh = cv2.threshold(cross, 127, 255, 0)
 

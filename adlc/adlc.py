@@ -9,7 +9,7 @@ from PIL import Image
 import cv2
 import numpy as np
 
-TESSDATA_PATH = str(Path.home() / ".local/share/tessdata")
+TESSDATA_PATH = "/tessdata"
 
 class ADLC:
     def __init__(self) -> None:
@@ -85,8 +85,6 @@ class ADLC:
         # Only include text
         cv2.drawContours(fg_mask, contours, 1, 255, -1)
         fg_mean = cv2.mean(image, mask=fg_mask)
-
-        cv2.imwrite("tmp/mask.png", fg_mask)
 
         # Convert BGR to RGB and convert to closest color
         bg_text = rgb_to_text(tuple(bg_mean[0:3][::-1]))
@@ -169,8 +167,8 @@ if __name__ == "__main__":
     # DEBUG HARDCODED VALUES:
     # For now use flight_238_im32-33 (hardcoded)
     images = [
-        cv2.imread("./data/flight_238/flight_238_im32.jpg"),
-        cv2.imread("./data/flight_238/flight_238_im33.jpg"),
+        cv2.imread("../data/flight_238/flight_238_im32.jpg"),
+        cv2.imread("../data/flight_238/flight_238_im33.jpg"),
     ]
 
     # Simulate batch API call

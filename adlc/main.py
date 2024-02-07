@@ -1,12 +1,10 @@
 from adlc.adlc import ADLC
 from fastapi import FastAPI, Depends
-from fastapi import Router
 from pydantic import BaseModel
-from typing import Annotated
+from typing import Annotated, Any
 from PIL import Image
 
 app = FastAPI()
-
 
 # Although ADLC is not stateful, this will hopefully avoid
 # instantiating large modules as often
@@ -20,7 +18,7 @@ async def get_adlc():
 
 
 @app.get("/process_img/")
-def process_img(img: Image, adlc=Annotated[ADLC, Depends(get_adlc)]) -> list[dict]:
+def process_img(img: Any, adlc=Annotated[ADLC, Depends(get_adlc)]) -> list[dict]:
     """
     Given a PIL image object, returns a list with a dict for each target found in the image
 

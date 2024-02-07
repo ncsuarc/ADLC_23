@@ -1,10 +1,10 @@
 fastapi
 keras
 keras_cv
-
+numpy>=1.22.0
 Pillow
 pydantic
 tensorflow[and-cuda]
 tesserocr
 uvicorn
-opencv-python==4.5.3.56
+opencv-python>=4.5.4
