@@ -1,0 +1,12 @@
+services:
+  api:
+    build:
+      context: .
+      target: builder
+    container_name: fastapi-adlc
+    environment:
+      TESSDATA_PREFIX: "/tessdata"
+      PORT: 8087
+    ports:
+      - '8087:8087'
+    restart: "no"
