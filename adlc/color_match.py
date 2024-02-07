@@ -7,7 +7,7 @@ Uses Euclidean distance between RGB vectors, but a more robust color difference 
 """
 
 from math import sqrt
-from sys import maxint
+# from sys import maxint
 
 COLOR_MAP = [
     ("WHITE", (255, 255, 255)),
@@ -32,7 +32,7 @@ def rgb_to_text(r_g_b: tuple[int, int, int]) -> str:
     """
     Finds color in COLOR_MAP with least difference to r_g_b
     """
-    min_diff = maxint
+    min_diff = 1e9
     min_name = None
     for name, name_rgb in COLOR_MAP:
         diff = color_diff(r_g_b, name_rgb)

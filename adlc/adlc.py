@@ -3,7 +3,7 @@ from adlc.color_match import rgb_to_text
 from adlc.geolocation import geolocate
 # from object_detection import TargetDetector
 # from single_ocr import TesseractCharReader
-from shape_match import ContourShapeMatcher
+from adlc.shape_match import ContourShapeMatcher
 
 from PIL import Image
 import cv2
