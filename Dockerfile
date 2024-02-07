@@ -13,10 +13,11 @@ RUN apt-get update && apt-get upgrade -y && \
     python3.11 \
 	python3-pip 
 
-RUN pip install numpy
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install numpy
 
 ## OpenCV 
-RUN apt-get update && apt-get install -y \
+RUN apt-get install -y \
     libopencv-dev \
     python3-opencv
 

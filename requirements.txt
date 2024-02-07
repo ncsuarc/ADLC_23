@@ -1,7 +1,7 @@
 fastapi
 keras
 keras_cv
-numpy
+
 Pillow
 pydantic
 tensorflow[and-cuda]
