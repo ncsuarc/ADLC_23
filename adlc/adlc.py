@@ -116,9 +116,6 @@ class ADLC:
 
         # Iterate over detected objects
         for i, image in enumerate(images):
-            # Get EXIF/XMP data
-            xmp_data = image.getxmp()
-
             # Store a list of dicts for each target detected
             image_targets = []
 
@@ -131,7 +128,7 @@ class ADLC:
                 center_y = y + (h // 2)
 
                 # Geolocate target
-                long, lat = geolocate(center_x, center_y, xmp_data)
+                long, lat = geolocate(center_x, center_y, metadata)
 
                 # Color check
                 bg_color, txt_color = self.match_colors(img_crop)
@@ -159,20 +156,3 @@ class ADLC:
             batch_results += image_targets
 
         return batch_results
-
-
-if __name__ == "__main__":
-    adlc = ADLC()
-
-    # DEBUG HARDCODED VALUES:
-    # For now use flight_238_im32-33 (hardcoded)
-    images = [
-        cv2.imread("../data/test/flight_238_im32.jpg"),
-        cv2.imread("../data/test/flight_238_im33.jpg"),
-    ]
-
-    # Simulate batch API call
-    results = adlc.process_images(images, None)
-
-    for r in results:
-        print(str(r))

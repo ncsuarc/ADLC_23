@@ -8,3 +8,17 @@ services:
     ports:
       - '8087:8087'
     restart: "no"
+    networks:
+      - adlc
+  test:
+    build: ./test
+    container_name: test-adlc
+    depends_on:
+      api:
+        condition: service_started
+    restart: "always"
+    networks:
+      - adlc
+
+networks:
+  adlc: {}

@@ -47,5 +47,6 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 COPY ./adlc ./adlc
 COPY ./data ./data
 COPY ./img ./img
+COPY ./test ./test
 
 CMD uvicorn adlc.main:app --host 0.0.0.0 --port $PORT
