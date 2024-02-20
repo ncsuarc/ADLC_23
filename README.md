@@ -1,12 +1,40 @@
 # ADLC
 
-As of right now, this just includes a script for generating a dataset from images and annotations and a notebook for preliminary testing on using a CNN for object detection.
+ADLC is deployed as a FastAPI service on port `8087` via Docker Compose. The `fastapi-adlc` provides a single `POST` endpoint `process_img` that takes a single image and returns detections and properties.
+## Usage
 
-Here is a sample output of `visualize_detections`
+### Starting ADLC
 
-![four img with bounding box](./img/output.png)
+*IN BASE DIRECTORY OF REPOSITORY* launch with Docker Compose
 
-Since the images are really high resolution, the lines cover the targets, but the boxes are accurate.
+```sh
+sudo docker compose build
+sudo docker compose up
+```
+
+### Example client usage (see `test/test_adlc.py`):
+
+```python
+from PIL import Image
+import requests
+import json
+
+im = Image.open(filename)
+files = {'file': (filename, open(filename, 'rb'), "image/jpeg")}
+res = requests.post("http://api:8087/process_img/", files=files)
+
+print(json.dumps(res.json(), indent=2))
+```
+
+## Limitations / TODOs
+
+* As of right now __object detection is disabled__ pending re-training on new targets.
+
+* Geolocation needs to be calibrated and debugged
+
+* Although OCR is attempted, the images are usually too blurry
+
+* Similarly, shape detection usually will just guess circles since contours are too hard to see.
 
 ## Data Annotation
 
@@ -16,32 +44,40 @@ To include the corresponding images, you will need to download them from the Kra
 
 ## Setup Development Environment
 
-### Using a Conda/Mamba Environment
+All of the following is included in the Dockerfiles, but if you want to set up locally:
 
-Create a conda environment using:
-
-```sh
-conda env create --file ncsuadlc_condaenv.yaml -n ncsuadlc
-conda activate ncsuadlc
-
-# Some requirements are only up-to-date on PyPi
-pip install -r ncsuadlc_pipreqs.txt
-```
-
-### Pip Only
+### Pip
 
 ```sh
+sudo apt install pip
 pip install -r requirements.txt
 ```
 
-## Using CuDNN Acceleration on VLC
+### OpenCV
+
+OpenCV binaries must be set up in addition to the Python wrapper libraries
+
+```sh
+export OPENCV_VERSION=4.5.4
+sudo apt install libopencv-dev python3-opencv
+```
+
+### Setup Tesseract
+
+Tesseraact is the OCR library used by the `tesserocr` wrapper. It is relatively large and can be tempermental.
+
+```sh
+sudo apt install tesseract-ocr libtesseract-dev libleptonica-dev pkg-config
+
+curl -o ~/.local/share/tessdata/eng.traineddata https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata
+```
+
+### Using CuDNN Acceleration on VCL
 
 NCSU provides VLCs with RTX 2080 GPUs that can be used for training the CNN quickly. CUDA is already installed on these systems but you will need to install CuDNN as well:
 
 ```sh
-sudo apt-get install libcudnn8=8.8.0.121-1+cuda12.1
-sudo apt-get install libcudnn8-dev=8.8.0.121-1+cuda12.1
-sudo apt-get install libcudnn8-samples=8.8.0.121-1+cuda12.1
+sudo apt install libcudnn8 libcudnn8-dev libcudnn8-samples
 ```
 
 To check that CuDNN was set up correctly, run built-in test suite:
@@ -49,14 +85,9 @@ To check that CuDNN was set up correctly, run built-in test suite:
 ```sh
 cp -r /usr/src/cudnn_samples_v8/ $HOME
 cd  $HOME/cudnn_samples_v8/mnistCUDNN
-make clean && make
-sudo apt-get install libfreeimage3 libfreeimage-dev
+sudo apt install libfreeimage3 libfreeimage-dev
 make clean && make
 ./mnistCUDNN
 ```
 
-You will also need to make sure that Tensorflow has needed GPU dependencies using:
-
-```sh
-pip install tensorflow[and-cuda]
-```
+See [cuDNN install guide](https://docs.nvidia.com/deeplearning/cudnn/install-guide/index.html#package-manager-ubuntu-install) for more info.
