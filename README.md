@@ -1,8 +1,18 @@
 # ADLC
 
 ADLC is deployed as a FastAPI service on port `8087` via Docker Compose. The `fastapi-adlc` provides a single `POST` endpoint `process_img` that takes a single image and returns detections and properties.
+## Usage
 
-Example usage (see `test/test_adlc.py`):
+### Starting ADLC
+
+*IN BASE DIRECTORY OF REPOSITORY* launch with Docker Compose
+
+```sh
+sudo docker compose build
+sudo docker compose up
+```
+
+### Example client usage (see `test/test_adlc.py`):
 
 ```python
 from PIL import Image
