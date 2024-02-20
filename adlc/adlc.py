@@ -1,8 +1,8 @@
 from pathlib import Path
 from adlc.color_match import rgb_to_text
 from adlc.geolocation import geolocate
-# from object_detection import TargetDetector
-# from single_ocr import TesseractCharReader
+from adlc.object_detection import TargetDetector
+from adlc.single_ocr import TesseractCharReader
 from adlc.shape_match import ContourShapeMatcher
 
 from PIL import Image
@@ -14,7 +14,7 @@ TESSDATA_PATH = "/tessdata"
 class ADLC:
     def __init__(self) -> None:
         # DISABLED for speed during testing
-        # self.ocr = TesseractCharReader(path=TESSDATA_PATH)
+        self.ocr = TesseractCharReader(path=TESSDATA_PATH)
         # self.targetDetector = TargetDetector()
         self.shapeMatcher = ContourShapeMatcher()
 
@@ -135,9 +135,7 @@ class ADLC:
                 bg_color, txt_color = self.match_colors(img_crop)
 
                 # OCR
-                # DISABLED for speed during testing
-                # char = self.read_character(img_crop)
-                char = None
+                char = self.read_character(img_crop)
 
                 # Shape matching
                 shape = self.match_shapes(img_crop)

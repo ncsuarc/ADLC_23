@@ -10,13 +10,20 @@ services:
     restart: "no"
     networks:
       - adlc
+    healthcheck:
+      test: curl --fail http://api:8087/docs || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 4
+      start_period: 10s
+      start_interval: 5s
   test:
     build: ./test
     container_name: test-adlc
     depends_on:
       api:
-        condition: service_started
-    restart: "on-failure:3"
+        condition: service_healthy
+    restart: "no"
     networks:
       - adlc
 
