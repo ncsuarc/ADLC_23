@@ -1,12 +1,30 @@
 # ADLC
 
-As of right now, this just includes a script for generating a dataset from images and annotations and a notebook for preliminary testing on using a CNN for object detection.
+ADLC is deployed as a FastAPI service on port `8087` via Docker Compose. The `fastapi-adlc` provides a single `POST` endpoint `process_img` that takes a single image and returns detections and properties.
 
-Here is a sample output of `visualize_detections`
+Example usage (see `test/test_adlc.py`):
 
-![four img with bounding box](./img/output.png)
+```python
+from PIL import Image
+import requests
+import json
 
-Since the images are really high resolution, the lines cover the targets, but the boxes are accurate.
+im = Image.open(filename)
+files = {'file': (filename, open(filename, 'rb'), "image/jpeg")}
+res = requests.post("http://api:8087/process_img/", files=files)
+
+print(json.dumps(res.json(), indent=2))
+```
+
+## Limitations / TODOs
+
+* As of right now __object detection is disabled__ pending re-training on new targets.
+
+* Geolocation needs to be calibrated and debugged
+
+* Although OCR is attempted, the images are usually too blurry
+
+* Similarly, shape detection usually will just guess circles since contours are too hard to see.
 
 ## Data Annotation
 
@@ -16,38 +34,39 @@ To include the corresponding images, you will need to download them from the Kra
 
 ## Setup Development Environment
 
-### Using a Conda/Mamba Environment
+All of the following is included in the Dockerfiles, but if you want to set up locally:
 
-Create a conda environment using:
-
-```sh
-conda env create --file ncsuadlc_condaenv.yaml -n ncsuadlc
-conda activate ncsuadlc
-
-# Some requirements are only up-to-date on PyPi
-pip install -r ncsuadlc_pipreqs.txt
-```
-
-### Pip Only (Recommended)
+### Pip
 
 ```sh
 sudo apt install pip
 pip install -r requirements.txt
 ```
 
-## Setup Tesseract
+### OpenCV
+
+OpenCV binaries must be set up in addition to the Python wrapper libraries
+
+```sh
+export OPENCV_VERSION=4.5.4
+sudo apt install libopencv-dev python3-opencv
+```
+
+### Setup Tesseract
+
+Tesseraact is the OCR library used by the `tesserocr` wrapper. It is relatively large and can be tempermental.
+
 ```sh
 sudo apt install tesseract-ocr libtesseract-dev libleptonica-dev pkg-config
 
 curl -o ~/.local/share/tessdata/eng.traineddata https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata
 ```
 
-## Using CuDNN Acceleration on VLC
+### Using CuDNN Acceleration on VCL
 
 NCSU provides VLCs with RTX 2080 GPUs that can be used for training the CNN quickly. CUDA is already installed on these systems but you will need to install CuDNN as well:
 
 ```sh
-#=8.8.0.121-1+cuda12.1
 sudo apt install libcudnn8 libcudnn8-dev libcudnn8-samples
 ```
 
@@ -62,9 +81,3 @@ make clean && make
 ```
 
 See [cuDNN install guide](https://docs.nvidia.com/deeplearning/cudnn/install-guide/index.html#package-manager-ubuntu-install) for more info.
-
-You will also need to make sure that Tensorflow has needed GPU dependencies using:
-
-```sh
-pip install tensorflow[and-cuda]
-```

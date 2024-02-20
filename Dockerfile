@@ -28,7 +28,7 @@ RUN mkdir /tessdata
 RUN curl -LJ -o /tessdata/eng.traineddata https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata
 RUN curl -LJ -o /tessdata/osd.traineddata https://github.com/tesseract-ocr/tessdata/raw/main/osd.traineddata
 
-# ## OpenCV 
+## OpenCV 
 RUN apt-get install -y \
     libopencv-dev \
     python3-opencv
