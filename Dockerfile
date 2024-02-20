@@ -38,14 +38,14 @@ WORKDIR /adlc
 ## pip requirements
 COPY requirements.txt ./
 
-RUN cat requirements.txt
+# RUN apt-get install -y exempi
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install -r requirements.txt
 
 # Copy source folder
 COPY ./adlc ./adlc
-COPY ./data ./data
+# COPY ./data ./data
 COPY ./img ./img
 COPY ./test ./test
 

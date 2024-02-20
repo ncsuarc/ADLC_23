@@ -16,7 +16,7 @@ services:
     depends_on:
       api:
         condition: service_started
-    restart: "always"
+    restart: "on-failure:3"
     networks:
       - adlc
 

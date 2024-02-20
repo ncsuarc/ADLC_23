@@ -34,25 +34,38 @@ C_Y = 2436
 S = 0
 
 
+class XMP_KEYS:
+    pitch = "ATTITUDE.pitch"
+    roll = "ATTITUDE.roll"
+    yaw = "ATTITUDE.yaw"
+    alt = "GLOBAL_POSITION_INT.relative_alt"
+    long = "GLOBAL_POSITION_INT.lon"
+    lat = "GLOBAL_POSITION_INT.lat"
+    heading = "GLOBAL_POSITION_INT.hdg"
+
+
 def _extract_attitude(xmp_data):
-    pitch = xmp_data.ncsu.ATTITUDE.pitch
-    roll = xmp_data.ncsu.ATTITUDE.roll
-    yaw = xmp_data.ncsu.ATTITUDE.yaw
+    pitch = float(xmp_data[XMP_KEYS.pitch])
+    roll = float(xmp_data[XMP_KEYS.roll])
+    yaw = float(xmp_data[XMP_KEYS.yaw])
 
-    heading = 0 # TODO: calc from attitude
-    angle = 0 # TODO: calc from attitude
+    heading = 0  # TODO: calc from attitude
+    angle = 0  # TODO: calc from attitude
 
-    alt = xmp_data.ncsu.GLOBAL_POSITION_INT.relative_alt / 10e2
-    long = xmp_data.ncsu.GLOBAL_POSITION_INT.lon / 10e6
-    lat = xmp_data.ncsu.GLOBAL_POSITION_INT.lat / 10e6
+    alt = int(xmp_data[XMP_KEYS.alt]) / 10e2
+    long = int(xmp_data[XMP_KEYS.long]) / 10e6
+    lat = int(xmp_data[XMP_KEYS.lat]) / 10e6
 
     return alt, angle, long, lat, heading
 
 
 def geolocate(x_t, y_t, xmp_data: Exif) -> tuple[int, int]:
-    cam_height, cam_angle, cam_long, cam_lat, heading = _extract_attitude(
-        xmp_data
-    )
+    try:
+        cam_height, cam_angle, cam_long, cam_lat, heading = _extract_attitude(xmp_data)
+    except:
+        # Missing values, probably XMP keys out of date
+        # target on null island
+        return 0, 0
 
     ## Depth estimation ################
 

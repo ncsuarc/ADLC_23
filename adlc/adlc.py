@@ -56,6 +56,7 @@ class ADLC:
         # DEBUG HARDCODED VALUES:
         # For now just return test values for flight_238_im32-33
         return [[(2763, 981, 54, 54)], [(2898, 0, 69, 48), (177, 288, 39, 42)]]
+        # return [[(2898, 0, 69, 48), (177, 288, 39, 42)]]
 
     def read_character(self, image) -> str:
         """

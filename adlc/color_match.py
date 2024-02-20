@@ -32,6 +32,9 @@ def rgb_to_text(r_g_b: tuple[int, int, int]) -> str:
     """
     Finds color in COLOR_MAP with least difference to r_g_b
     """
+
+    print(f"[COLOR MATCH] received RGB({r_g_b})")
+
     min_diff = 1e9
     min_name = None
     for name, name_rgb in COLOR_MAP:
