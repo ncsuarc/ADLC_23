@@ -10,3 +10,5 @@ adlc/__pycache__/object_detection.cpython-310.pyc
 tmp/mask.png
 .venv/*
 tmp
+data/flight263_COCO
+*.tar
