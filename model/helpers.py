@@ -35,7 +35,7 @@ def plot(imgs, row_title=None, **imshow_kwargs):
 
             img = F.to_dtype(img, torch.uint8, scale=True)
             if boxes is not None:
-                img = draw_bounding_boxes(img, boxes, colors="yellow", width=3)
+                img = draw_bounding_boxes(img, boxes, colors="red", width=3)
             if masks is not None:
                 img = draw_segmentation_masks(img, masks.to(torch.bool), colors=["green"] * masks.shape[0], alpha=.65)
 

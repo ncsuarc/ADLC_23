@@ -12,3 +12,4 @@ tmp/mask.png
 tmp
 data/flight263_COCO
 *.tar
+model/nohup.out
